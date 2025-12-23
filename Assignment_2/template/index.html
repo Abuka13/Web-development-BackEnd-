@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Assignment</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<h1>Random User API Project</h1>
+<button onclick="loadUser()">Get Random User</button>
+
+<div id="result"></div>
+
+<script>
+async function loadUser() {
+    const res = await fetch("/api/user");
+    const data = await res.json();
+
+    document.getElementById("result").innerHTML = `
+        <div class="card">
+            <img src="${data.user.picture}">
+            <p><b>Name:</b> ${data.user.firstName} ${data.user.lastName}</p>
+            <p><b>Gender:</b> ${data.user.gender}</p>
+            <p><b>Age:</b> ${data.user.age}</p>
+            <p><b>Address:</b> ${data.user.address}, ${data.user.city}, ${data.user.country}</p>
+        </div>
+
+        <div class="card">
+            <img src="${data.country.flag}" width="100">
+            <p><b>Capital:</b> ${data.country.capital}</p>
+            <p><b>Languages:</b> ${data.country.languages}</p>
+            <p><b>Currency:</b> ${data.country.currency}</p>
+            <p>1 ${data.country.currency} = ${data.exchange.usd} USD</p>
+            <p>1 ${data.country.currency} = ${data.exchange.kzt} KZT</p>
+        </div>
+
+        <h3>News</h3>
+        ${data.news.map(n => `
+            <div class="card">
+                <h4>${n.title}</h4>
+                ${n.image ? `<img src="${n.image}" width="200">` : ""}
+                <p>${n.description || ""}</p>
+                <a href="${n.url}" target="_blank">Read more</a>
+            </div>
+        `).join("")}
+    `;
+}
+</script>
+
+</body>
+</html>

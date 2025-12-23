@@ -1,13 +1,14 @@
 const express = require("express");
 const axios = require("axios");
 const path = require("path");
+require("dotenv").config();
 
 const app = express();
-app.use(express.static("public"));
+app.use(express.static("template"));
 
-
-const NEWS_API_KEY = "3149777e10af4cd992bee752d2ca365a";
-const EXCHANGE_API_KEY = "24a13ea25983d7b795ea436c";
+const NEWS_API_KEY = process.env.NEWS_API_KEY;
+const EXCHANGE_API_KEY = process.env.EXCHANGE_API_KEY;
+const PORT = process.env.PORT || 3000;
 
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "template", "index.html"));
@@ -61,10 +62,11 @@ app.get("/api/user", async (req, res) => {
 
         //  News API
         const newsRes = await axios.get(
-            `https://newsapi.org/v2/everything?q=${userData.country}&language=en&pageSize=5&apiKey=${NEWS_API_KEY}`
+            `https://newsapi.org/v2/everything?q=${userData.country}&searchIn=title&${userD}language=ru&pageSize=5&apiKey=${NEWS_API_KEY}`
         );
 
         const news = newsRes.data.articles.map(n => ({
+
             title: n.title,
             description: n.description,
             image: n.urlToImage,
@@ -84,6 +86,6 @@ app.get("/api/user", async (req, res) => {
     }
 });
 
-app.listen(3000, () => {
-    console.log("Server running on http://localhost:3000");
+app.listen(PORT, () => {
+    console.log(`http://localhost:${PORT}`);
 });

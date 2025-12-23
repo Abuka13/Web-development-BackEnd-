@@ -4,7 +4,7 @@ const path = require("path");
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static("public"));
+app.use(express.static("static"));
 
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "templates", "index.html"));
@@ -48,6 +48,7 @@ app.post("/calculate-bmi", (req, res) => {
             <h2>Your BMI Result</h2>
             <p>BMI: ${bmi.toFixed(2)}</p>
             <p style="color:${color}">Category: ${category}</p>
+            
             <a href="/">Back</a>
         </body>
         </html>

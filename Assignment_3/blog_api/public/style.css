@@ -1,0 +1,145 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f4;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+h2 {
+    color: #555;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 10px;
+}
+
+/* Form Styles */
+.form-container {
+    margin-bottom: 30px;
+}
+
+form {
+    margin-top: 15px;
+}
+
+label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+input[type="text"],
+textarea {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+button {
+    margin-top: 10px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+button[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+}
+
+button[type="button"] {
+    background-color: #888;
+    color: white;
+}
+
+#refreshBtn {
+    background-color: #2196F3;
+    color: white;
+}
+
+/* Message */
+#message {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 3px;
+    display: none;
+}
+
+#message.success {
+    background-color: #d4edda;
+    color: #155724;
+    display: block;
+}
+
+#message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    display: block;
+}
+
+/* Blog List */
+.blog-container {
+    margin-top: 20px;
+}
+
+#blogList {
+    margin-top: 15px;
+}
+
+.blog-item {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 3px;
+    background-color: #fafafa;
+}
+
+.blog-item h3 {
+    margin: 0 0 10px 0;
+    color: #333;
+}
+
+.blog-item p {
+    margin: 5px 0;
+    color: #666;
+}
+
+.blog-item .meta {
+    font-size: 0.9em;
+    color: #999;
+    margin: 10px 0;
+}
+
+.blog-item button {
+    margin-top: 10px;
+}
+
+.blog-item .edit-btn {
+    background-color: #ff9800;
+    color: white;
+}
+
+.blog-item .delete-btn {
+    background-color: #f44336;
+    color: white;
+}

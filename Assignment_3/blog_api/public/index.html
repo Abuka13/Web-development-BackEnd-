@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog CRUD Application</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Blog CRUD Application</h1>
+
+        <!-- Create/Update Form -->
+        <div class="form-container">
+            <h2>Create Blog Post</h2>
+            <form id="blogForm">
+                <label>Title:</label>
+                <input type="text" id="title" required>
+
+                <label>Body:</label>
+                <textarea id="body" required></textarea>
+
+                <label>Author:</label>
+                <input type="text" id="author" placeholder="Optional">
+
+                <input type="hidden" id="blogId">
+
+                <button type="submit" id="submitBtn">Create</button>
+                <button type="button" id="cancelBtn">Cancel</button>
+            </form>
+            <div id="message"></div>
+        </div>
+
+        <!-- Blog List -->
+        <div class="blog-container">
+            <h2>All Blogs</h2>
+            <button id="refreshBtn">Refresh</button>
+            <div id="blogList"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

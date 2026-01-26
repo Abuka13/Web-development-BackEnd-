@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 
 const app = express();
 
-const MONGO_URL = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.wpjd2lz.mongodb.net/?retryWrites=true&w=majority`;
+const MONGO_URL = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.wpjd2lz.mongodb.net/?retryWrites=true&w=majority/blogDB`;
 
 mongoose
   .connect(MONGO_URL)

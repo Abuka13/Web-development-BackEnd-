@@ -103,10 +103,7 @@ router.put('/blogs/:id', async (req, res) => {
       });
     }
 
-    res.status(500).json({
-      success: false,
-      message: 'Error updating blog post',
-      error: error.message
+    res.status(500).json({success: false, message: 'Error updating blog post', error: error.message
     });
   }
 });
@@ -122,25 +119,18 @@ router.delete('/blogs/:id', async (req, res) => {
 
 
     if (!deletedBlog) {
-      return res.status(404).json({
-        success: false,
-        message: 'Blog post not found'
+      return res.status(404).json({success: false, message: 'Blog post not found'
       });
     }
 
 
-    res.status(200).json({
-      success: true,
-      message: 'Blog post deleted successfully',
-      data: deletedBlog
+    res.status(200).json({success: true, message: 'Blog post deleted successfully', data: deletedBlog
     });
 
   } catch (error) {
 
     if (error.kind === 'ObjectId') {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid blog ID format'
+      return res.status(400).json({success: false, message: 'Invalid blog ID format'
       });
     }
 

@@ -1,148 +1,130 @@
 const Measurement = require("../models/Measurement");
 
+const MIN_YEAR = 2023;
+const MAX_YEAR = new Date().getFullYear() + 1;
+
+const isValidDate = (value) => {
+  const d = new Date(value);
+  return !isNaN(d.getTime());
+};
+
+const isValidYear = (value) => {
+  const year = new Date(value).getFullYear();
+  return year >= MIN_YEAR && year <= MAX_YEAR;
+};
+
+const validateParams = (req) => {
+  let { field, start_date, end_date } = req.query;
+
+    start_date = start_date && start_date.trim() !== "" ? start_date : undefined;
+    end_date = end_date && end_date.trim() !== "" ? end_date : undefined;
+
+  if (!field) {
+    return "Query parameter 'field' is required";
+  }
+
+  if (!["field1", "field2", "field3"].includes(field)) {
+    return "Field must be field1, field2 or field3";
+  }
+
+  if (start_date) {
+    if (!isValidDate(start_date) || !isValidYear(start_date)) {
+      return "start_date must be between 2023 and current year";
+    }
+  }
+
+  if (end_date) {
+    if (!isValidDate(end_date) || !isValidYear(end_date)) {
+      return "end_date must be between 2023 and current year";
+    }
+  }
+
+  if (start_date && end_date && new Date(start_date) > new Date(end_date)) {
+    return "start_date cannot be later than end_date";
+  }
+
+  return null;
+};
+
+const buildFilter = (start_date, end_date) => {
+  const filter = {};
+  if (start_date || end_date) {
+    filter.timestamp = {};
+    if (start_date) filter.timestamp.$gte = new Date(start_date);
+    if (end_date) filter.timestamp.$lte = new Date(end_date);
+  }
+  return filter;
+};
+
 const getMeasurements = async (req, res) => {
   try {
-
-    const field = req.query.field;
-    const startDate = req.query.start_date;
-    const endDate = req.query.end_date;
-
-
-    if (!field) {
-      return res.status(400).json({
-        message: "Query parameter 'field' is required"
-      });
+    const error = validateParams(req);
+    if (error) {
+      return res.status(400).json({ message: error });
     }
 
-    if (field !== "field1" && field !== "field2" && field !== "field3") {
-      return res.status(400).json({
-        message: "Field must be field1, field2 or field3"
-      });
-    }
+    const { field, start_date, end_date } = req.query;
+    const filter = buildFilter(start_date, end_date);
 
-
-    const filter = {};
-
-    if (startDate || endDate) {
-      filter.timestamp = {};
-
-      if (startDate) {
-        filter.timestamp.$gte = new Date(startDate);
-      }
-
-      if (endDate) {
-        filter.timestamp.$lte = new Date(endDate);
-      }
-    }
-
-
-    const measurements = await Measurement.find(filter)
+    const data = await Measurement.find(filter)
       .sort({ timestamp: 1 })
-      .select({
-        timestamp: 1,
-        [field]: 1,
-        _id: 0
-      });
+      .select({ timestamp: 1, [field]: 1, _id: 0 });
 
-
-    if (measurements.length === 0) {
-      return res.status(404).json({
-        message: "No data found"
-      });
+    if (data.length === 0) {
+      return res.status(404).json({ message: "No data found" });
     }
 
-
-    res.status(200).json({
-      field: field,
-      count: measurements.length,
-      data: measurements
-    });
-
-  } catch (error) {
-    res.status(500).json({
-      message: "Server error",
-      error: error.message
-    });
+    res.json({field, count: data.length, data});
+  } catch (e) {
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-
-
 const getMetrics = async (req, res) => {
   try {
-    const field = req.query.field;
-    const startDate = req.query.start_date;
-    const endDate = req.query.end_date;
-
-    if (!field) {
-      return res.status(400).json({
-        message: "Query parameter 'field' is required"
-      });
+    const error = validateParams(req);
+    if (error) {
+      return res.status(400).json({ message: error });
     }
 
-    if (field !== "field1" && field !== "field2" && field !== "field3") {
-      return res.status(400).json({
-        message: "Field must be field1, field2 or field3"
-      });
+    let { field, start_date, end_date } = req.query;
+
+    start_date = start_date && start_date.trim() !== "" ? start_date : undefined;
+    end_date = end_date && end_date.trim() !== "" ? end_date : undefined;
+    const filter = buildFilter(start_date, end_date);
+
+    const docs = await Measurement.find(filter).select({ [field]: 1, _id: 0 });
+
+    if (docs.length === 0) {
+      return res.status(404).json({ message: "No data found" });
     }
 
-    const filter = {};
-
-    if (startDate || endDate) {
-      filter.timestamp = {};
-
-      if (startDate) {
-        filter.timestamp.$gte = new Date(startDate);
-      }
-
-      if (endDate) {
-        filter.timestamp.$lte = new Date(endDate);
-      }
-    }
-
-    const data = await Measurement.find(filter).select({
-      [field]: 1,
-      _id: 0
-    });
-
-    if (data.length === 0) {
-      return res.status(404).json({
-        message: "No data found"
-      });
-    }
-
-
-    const values = data.map(item => item[field]);
-
+    const values = docs.map(d => d[field]);
 
     let sum = 0;
     let min = values[0];
     let max = values[0];
 
-    for (let i = 0; i < values.length; i++) {
-      sum += values[i];
-
-      if (values[i] < min) min = values[i];
-      if (values[i] > max) max = values[i];
+    for (const v of values) {
+      sum += v;
+      if (v < min) min = v;
+      if (v > max) max = v;
     }
 
     const avg = sum / values.length;
 
-    let varianceSum = 0;
-    for (let i = 0; i < values.length; i++) {
-      varianceSum += Math.pow(values[i] - avg, 2);
+    let variance = 0;
+    for (const v of values) {
+      variance += Math.pow(v - avg, 2);
     }
 
-    const stdDev = Math.sqrt(varianceSum / values.length);
+    const stdDev = Math.sqrt(variance / values.length);
 
-
-    res.status(200).json({avg: Number(avg.toFixed(2)), min, max, stdDev: Number(stdDev.toFixed(2))
+    res.json({avg: Number(avg.toFixed(2)), min, max, stdDev: Number(stdDev.toFixed(2))
     });
-
-  } catch (error) {
-    res.status(500).json({message: "Server error", error: error.message});
+  } catch (e) {
+    res.status(500).json({ message: "Server error" });
   }
 };
 
 module.exports = {getMeasurements, getMetrics};
-

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Weather Analytics</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+    }
+    form {
+      margin-bottom: 30px;
+    }
+    label {
+      margin-right: 10px;
+    }
+    canvas {
+      max-width: 800px;
+    }
+    .metrics {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Weather Analytics</h1>
+
+  <form id="filterForm">
+    <label>
+      Field:
+      <select id="field">
+        <option value="field1">Temperature</option>
+        <option value="field2">Humidity</option>
+        <option value="field3">Wind Speed</option>
+      </select>
+    </label>
+
+    <label>
+      Start date:
+      <input type="date" id="startDate">
+    </label>
+
+    <label>
+      End date:
+      <input type="date" id="endDate">
+    </label>
+
+    <label>
+      Chart type:
+      <select id="chartType">
+        <option value="line">Line</option>
+        <option value="bar">Bar</option>
+      </select>
+    </label>
+
+    <button type="submit">Show</button>
+  </form>
+
+  <canvas id="chart"></canvas>
+
+  <div class="metrics" id="metrics"></div>
+
+  <script>
+    const form = document.getElementById("filterForm");
+    const ctx = document.getElementById("chart").getContext("2d");
+    const metricsDiv = document.getElementById("metrics");
+    let chart;
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const field = document.getElementById("field").value;
+      const startDate = document.getElementById("startDate").value;
+      const endDate = document.getElementById("endDate").value;
+      const chartType = document.getElementById("chartType").value;
+
+      const minYear = 2000;
+      const maxYear = new Date().getFullYear() + 1;
+
+      if (startDate) {
+        const y = new Date(startDate).getFullYear();
+        if (y < minYear || y > maxYear) {
+          alert("Invalid start date");
+          return;
+        }
+      }
+
+      if (endDate) {
+        const y = new Date(endDate).getFullYear();
+        if (y < minYear || y > maxYear) {
+          alert("Invalid end date");
+          return;
+        }
+      }
+
+      if (startDate && endDate && startDate > endDate) {
+        alert("Start date cannot be later than end date");
+        return;
+      }
+
+      let url = `/api/measurements?field=${field}`;
+      if (startDate) url += `&start_date=${startDate}`;
+      if (endDate) url += `&end_date=${endDate}`;
+
+      const response = await fetch(url);
+      const result = await response.json();
+
+      if (!response.ok) {
+        alert(result.message || "Error");
+        return;
+      }
+
+      const labels = result.data.map(item =>
+        new Date(item.timestamp).toLocaleDateString()
+      );
+
+      const values = result.data.map(item => item[field]);
+
+      if (chart) {
+        chart.destroy();
+      }
+
+      chart = new Chart(ctx, {
+        type: chartType,
+        data: {
+          labels: labels,
+          datasets: [{
+            label: field,
+            data: values,
+            borderColor: "blue",
+            backgroundColor: "rgba(0, 0, 255, 0.3)",
+            fill: false
+          }]
+        }
+      });
+
+      let metricsUrl = `/api/measurements/metrics?field=${field}`;
+      if (startDate) metricsUrl += `&start_date=${startDate}`;
+      if (endDate) metricsUrl += `&end_date=${endDate}`;
+
+      const metricsResponse = await fetch(metricsUrl);
+      const metrics = await metricsResponse.json();
+
+      if (!metricsResponse.ok) {
+        alert(metrics.message || "Metrics error");
+        return;
+      }
+
+      metricsDiv.innerHTML = `
+        <h3>Metrics</h3>
+        <p>Average: ${metrics.avg}</p>
+        <p>Min: ${metrics.min}</p>
+        <p>Max: ${metrics.max}</p>
+        <p>Standard Deviation: ${metrics.stdDev}</p>
+      `;
+    });
+  </script>
+
+</body>
+</html>
